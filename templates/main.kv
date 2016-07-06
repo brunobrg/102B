@@ -1,0 +1,40 @@
+#: kivy 1.9.1
+#: import Transition kivy.uix.screenmanager.NoTransition
+
+<ScreenManagement>:
+  id: screen_manager
+  transition: Transition()
+  main_screen: main_screen
+  play: play
+
+  MainScreen:
+    id: main_screen
+    name: 'main screen'
+    manager: screen_manager
+
+  PlayScreen:
+    id: play
+    name: 'play'
+    manager: screen_manager
+
+<MainScreen>:
+  BoxLayout:
+    orientation: 'vertical'
+    padding: [150, 0]
+    spacing: 30
+
+    BoxLayout:
+      orientation: 'vertical'
+
+      Label:
+        text: '204B'
+        font_size: 32
+
+      Label:
+        text: 'Click to'
+        font_size: 18
+
+    Button:
+      text: 'PLAY'
+      font_size: 24
+      on_release: app.root.current = 'play'
