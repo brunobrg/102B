@@ -6,8 +6,12 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import Color, Rectangle, Canvas
 from kivy.input.shape import ShapeRect
+from kivy.animation import Animation
+from kivy.uix.widget import Widget
+from kivy.clock import Clock
 
 presentation = Builder.load_file("templates/game.kv")
+app = None
 
 class PlayScreen(Screen):
     def __init__(self, **kwargs):
@@ -59,13 +63,18 @@ class Bloco(Scatter):
         return super(Bloco, self).on_touch_up(touch)
 
     def swipeUp(self):
-        self.pos = [self.x, self.y + 100]
+        if self.y < 300:
+            Animation(pos=[self.x, self.y + 100], d=.1, t='out_quad').start(self)
+
 
     def swipeDown(self):
-        self.pos = [self.x, self.y-100]
+        if self.y > 0:
+            Animation(pos=[self.x, self.y-100], d=.1, t='out_quad').start(self)
 
     def swipeLeft(self):
-        self.pos = [self.x - 100, self.y]
+        if self.x > 0:
+            Animation(pos=[self.x - 100, self.y], d=.1, t='out_quad').start(self)
 
     def swipeRight(self):
-        self.pos = [self.x + 100, self.y]
+        if self.x < 300:
+            Animation(pos= [self.x + 100, self.y], d=.1, t='out_quad').start(self)

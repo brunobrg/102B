@@ -24,6 +24,8 @@ class MainScreen(Screen):
 
 class MainApp(App):
     def build(self):
+        global app
+        app = self
         return ScreenManagement()
 
     def on_size(self, *args):
