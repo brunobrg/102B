@@ -2,16 +2,4 @@
 #: import Transition kivy.uix.screenmanager.NoTransition
 
 <PlayScreen>:
-  FloatLayout:
-    size: 600, 600
-    canvas:
-      Color:
-        rgba: 0,0,0,0
-      Rectangle:
-        pos: 0, 0
-        size: 800, 600
-
-    Button:
-      size_hint: 0.25, 0.25
-      text: 'BIRL'
-      font_size: 60
+  on_enter: root.startGame()
