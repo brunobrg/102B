@@ -4,6 +4,7 @@ from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from game import PlayScreen
 from kivy.config import Config
+from kivy.ext import load
 
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '400')

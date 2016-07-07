@@ -11,6 +11,7 @@ from kivy.uix.widget import Widget
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
 from random import choice, random
+from kivy.core.audio import SoundLoader
 
 presentation = Builder.load_file("templates/game.kv")
 app = None
@@ -172,6 +173,10 @@ class GameBackground(FloatLayout):
                 bloco1.value *= 2
                 bloco2.destroy()
                 del blocos[i + 1]
+
+                sound = SoundLoader.load('sounds/bir.ogg')
+                if sound:
+                    Clock.schedule_once(sound.play, 0.1)
             i += 1
 
 class Bloco(Scatter):
