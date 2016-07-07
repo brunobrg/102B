@@ -3,3 +3,8 @@
 
 <PlayScreen>:
   on_enter: root.startGame()
+
+<Bloco>:
+  Label:
+    text: str(root.value)
+    font_size: min(self.height, self.width) / 2.5

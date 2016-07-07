@@ -9,6 +9,7 @@ from kivy.input.shape import ShapeRect
 from kivy.animation import Animation
 from kivy.uix.widget import Widget
 from kivy.clock import Clock
+from kivy.properties import NumericProperty
 from random import choice, random
 
 presentation = Builder.load_file("templates/game.kv")
@@ -43,15 +44,84 @@ class GameBackground(FloatLayout):
             [None, None, None, None],
             [None, None, None, None],
             [None, None, None, None]]
+
         self.adiciona_bloco()
         self.adiciona_bloco()
 
     def on_touch_up(self, touch):
         if(abs(abs(touch.ox - touch.x) - abs(touch.oy - touch.y)) > 50):
             if(abs(touch.ox - touch.x) > abs(touch.oy - touch.y)):
-                self.adiciona_bloco()
+                self.swipe_horizontal(touch.ox < touch.x)
+                return True
+            else:
+                self.swipe_vertical(touch.oy < touch.y)
+                return True
 
         return super(GameBackground, self).on_touch_up(touch)
+
+    # def on_touch_down(self, touch):
+    #     self.adiciona_bloco()
+    #     return True
+
+    def swipe_horizontal(self, pra_direita):
+        r = range(3, -1, -1) if pra_direita else range(4)
+        matriz = self.matriz
+        moveu = False
+
+        for iy in range(4):
+            # get all the cube for the current line
+            blocos = []
+            for ix in r:
+                bloco = matriz[ix][iy]
+                if bloco:
+                    blocos.append(bloco)
+
+            # combine them
+            self.combinar(blocos)
+
+            # update the grid
+            for ix in r:
+                bloco = blocos.pop(0) if blocos else None
+                if matriz[ix][iy] != bloco:
+                    moveu = True
+                matriz[ix][iy] = bloco
+                if not bloco:
+                    continue
+                pos = self.indice_para_posicao(ix, iy)
+                if bloco.pos != pos:
+                    bloco.move(pos)
+
+        Clock.schedule_once(self.adiciona_bloco, .20)
+
+    def swipe_vertical(self, pra_cima):
+        r = range(3, -1, -1) if pra_cima else range(4)
+        matriz = self.matriz
+        moveu = False
+
+        for ix in range(4):
+            # get all the cube for the current line
+            blocos = []
+            for iy in r:
+                bloco = matriz[ix][iy]
+                if bloco:
+                    blocos.append(bloco)
+
+            # combine them
+            self.combinar(blocos)
+
+            # update the grid
+            for iy in r:
+                bloco = blocos.pop(0) if blocos else None
+                if matriz[ix][iy] != bloco:
+                    moveu = True
+                matriz[ix][iy] = bloco
+                if not bloco:
+                    continue
+                pos = self.indice_para_posicao(ix, iy)
+                if bloco.pos != pos:
+                    bloco.move(pos)
+
+        Clock.schedule_once(self.adiciona_bloco, .20)
 
     def indice_para_posicao(self, ix, iy):
         return [
@@ -84,53 +154,44 @@ class GameBackground(FloatLayout):
         self.adiciona_bloco_pos(ix, iy, value)
 
     def adiciona_bloco_pos(self, ix, iy, value):
-        bloco = Bloco(value,
-                pos=self.indice_para_posicao(ix, iy)
+        bloco = Bloco(
+                pos=self.indice_para_posicao(ix, iy),
+                value = value
                 )
         self.matriz[ix][iy] = bloco
         self.add_widget(bloco)
 
+    def combinar(self, blocos):
+        if len(blocos) <= 1:
+            return blocos
+        i = 0
+        while i < len(blocos) - 1:
+            bloco1 = blocos[i]
+            bloco2 = blocos[i + 1]
+            if bloco1.value == bloco2.value:
+                bloco1.value *= 2
+                bloco2.destroy()
+                del blocos[i + 1]
+            i += 1
+
 class Bloco(Scatter):
-    def __init__(self, value, **kwargs):
+    value = NumericProperty(2)
+
+    def __init__(self, **kwargs):
         super(Bloco, self).__init__(**kwargs)
         self.size= (100,100)
-        self.add_widget(Label(text=str(value)))
-
-    def on_touch_move(self, touch):
-        return True
 
     def on_touch_down(self, touch):
         return True
 
     def on_touch_up(self, touch):
-        if(abs(abs(touch.ox - touch.x) - abs(touch.oy - touch.y)) > 50):
-            if(abs(touch.ox - touch.x) > abs(touch.oy - touch.y)):
-                if(touch.ox > touch.x):
-                    self.swipeLeft()
-                else:
-                    self.swipeRight()
-            else:
-                if(touch.oy > touch.y):
-                    self.swipeDown()
-                else:
-                    self.swipeUp()
-        return super(Bloco, self).on_touch_up(touch)
+        return True
 
-    def swipeUp(self):
-        if self.y < 300:
-            Animation(pos=[self.x, self.y + 100], d=.1, t='out_quad').start(self)
+    def on_touch_move(self, touch):
+        return True
 
-    def swipeDown(self):
-        if self.y > 0:
-            Animation(pos=[self.x, self.y-100], d=.1, t='out_quad').start(self)
-
-    def swipeLeft(self):
-        if self.x > 0:
-            Animation(pos=[self.x - 100, self.y], d=.1, t='out_quad').start(self)
-
-    def swipeRight(self):
-        if self.x < 300:
-            Animation(pos= [self.x + 100, self.y], d=.1, t='out_quad').start(self)
+    def move(self, pos):
+            Animation(pos=pos, d=.1, t='out_quad').start(self)
 
     def destroy(self, *args):
         self.parent.remove_widget(self)
