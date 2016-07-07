@@ -12,9 +12,30 @@ from kivy.clock import Clock
 from kivy.properties import NumericProperty
 from random import choice, random
 from kivy.core.audio import SoundLoader
+import imp
+import os
+
+PluginFolder = "./plugins"
+MainModule = "__init__"
+
 
 presentation = Builder.load_file("templates/game.kv")
 app = None
+sound_path = None
+
+def getPlugins():
+    plugins = []
+    possibleplugins = os.listdir(PluginFolder)
+    for i in possibleplugins:
+        location = os.path.join(PluginFolder, i)
+        if not os.path.isdir(location) or not MainModule + ".py" in os.listdir(location):
+            continue
+        info = imp.find_module(MainModule, [location])
+        plugins.append({"name": i, "info": info})
+    return plugins
+
+def loadPlugin(plugin):
+    return imp.load_module(MainModule, *plugin["info"])
 
 class PlayScreen(Screen):
     def __init__(self, **kwargs):
@@ -25,6 +46,12 @@ class PlayScreen(Screen):
         self.window.add_widget(self.background)
 
     def startGame(self):
+        global sound_path
+        sound_path = 'sounds/alarm.ogg'
+        for i in getPlugins():
+            print("Carregando o Plugin: " + i["name"])
+            plugin = loadPlugin(i)
+            sound_path = plugin.run()
         self.background.startGame()
 
 class GameBackground(FloatLayout):
@@ -174,7 +201,7 @@ class GameBackground(FloatLayout):
                 bloco2.destroy()
                 del blocos[i + 1]
 
-                sound = SoundLoader.load('sounds/bir.ogg')
+                sound = SoundLoader.load(sound_path)
                 if sound:
                     sound.play()
             i += 1
