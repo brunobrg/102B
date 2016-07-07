@@ -176,7 +176,7 @@ class GameBackground(FloatLayout):
 
                 sound = SoundLoader.load('sounds/bir.ogg')
                 if sound:
-                    Clock.schedule_once(sound.play, 0.1)
+                    sound.play()
             i += 1
 
 class Bloco(Scatter):

@@ -9,6 +9,7 @@ from kivy.ext import load
 Config.set('graphics', 'width', '400')
 Config.set('graphics', 'height', '400')
 Config.set('graphics', 'resizable', 0)
+Config.set('modules', 'teste_plugin', '')
 
 presentation = Builder.load_file("templates/main.kv")
 
